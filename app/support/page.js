@@ -86,7 +86,7 @@ export default function SupportPage() {
                       transform transition-transform duration-300 hover:scale-[1.01]
                       border border-gray-200">
         <h1 className="text-4xl font-extrabold mb-4 text-gray-800">
-          Support the Developer 🎓
+          Support the Developer
         </h1>
         <p className="text-gray-600 mb-6 text-lg">
           Your generous contribution directly fuels my learning journey and helps me continue building useful tools like this AI image generator. Every bit helps!
