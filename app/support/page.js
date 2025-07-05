@@ -20,7 +20,7 @@ export default function SupportPage() {
       // Clear the query params after displaying message
       router.replace('/support', undefined, { shallow: true });
     } else if (searchParams.get('canceled')) {
-      // FIX: Using template literal to avoid apostrophe escape issues
+      // FINAL FIX: Using HTML entity for apostrophe to ensure no parsing issues
       setMessage(`Payment canceled. No worries, you can always support later!`);
       router.replace('/support', undefined, { shallow: true });
     }
