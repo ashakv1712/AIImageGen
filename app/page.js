@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link' // Import Link for navigation
+import Image from 'next/image' // Import Image component
 
 export default function Home() {
   const [prompt, setPrompt] = useState('')
@@ -109,11 +110,15 @@ export default function Home() {
 
         {image && (
           <div className="mt-8 flex flex-col items-center">
-            <img
+            {/* Using Next.js Image component for optimization */}
+            <Image
               src={image}
               alt="Generated"
+              width={500} // Provide a default width
+              height={500} // Provide a default height
               className="max-w-full h-auto rounded-xl shadow-xl border border-gray-200
-                         object-contain max-h-[400px] mb-6" // Added max-h to prevent overly large images
+                         object-contain max-h-[400px] mb-6"
+              priority // Prioritize loading of this image
             />
             <button
               onClick={handleDownloadImage}

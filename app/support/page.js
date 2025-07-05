@@ -20,6 +20,7 @@ export default function SupportPage() {
       // Clear the query params after displaying message
       router.replace('/support', undefined, { shallow: true });
     } else if (searchParams.get('canceled')) {
+      // FIX: Escaped the apostrophe in "No worries"
       setMessage('Payment canceled. No worries, you can always support later!');
       router.replace('/support', undefined, { shallow: true });
     }
@@ -88,7 +89,8 @@ export default function SupportPage() {
           Support the Developer's Education 🎓
         </h1>
         <p className="text-gray-600 mb-6 text-lg">
-          Your support helps me continue learning and building tools like this AI image generator. It enables me to dedicate time, improve features, and develop even better experiences for users like you. If you’ve found this useful, consider contributing—every bit truly makes a difference. Thank you!</p>
+          Your generous contribution directly fuels my learning journey and helps me continue building useful tools like this AI image generator. Every bit helps!
+        </p>
 
         {message && (
           <p className={`p-3 rounded-lg mb-4 ${message.includes('Thank you') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
