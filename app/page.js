@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link' // Import Link for navigation
-import Image from 'next/image' // Import Image component
+import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Home() {
   const [prompt, setPrompt] = useState('')
@@ -9,60 +9,58 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      setError('Please enter a prompt.')
-      return
+  // In your page.js, update the handleGenerate function:
+const handleGenerate = async () => {
+  if (!prompt.trim()) {
+    setError('Please enter a prompt.')
+    return
+  }
+
+  setLoading(true)
+  setImage(null)
+  setError('')
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    })
+
+    const data = await res.json()
+    
+    // Add debugging
+    console.log('API Response:', data)
+    console.log('Image URL:', data.image)
+
+    if (!res.ok) {
+      const message = typeof data === 'string' ? data : data?.error || 'Failed to generate image from server.';
+      throw new Error(message);
     }
 
-    setLoading(true)
-    setImage(null) // Clear previous image
-    setError('') // Clear previous errors
-
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        // If the response is not OK, throw an error with the message from the API
-        throw new Error(data.error || 'Failed to generate image from server.');
-      }
-
-      setImage(data.image)
-    } catch (err) {
-      setError(err.message)
-      console.error("Frontend image generation error:", err);
-    } finally {
-      setLoading(false)
+    setImage(data.image)
+  } catch (err) {
+    setError(err?.message || 'Unexpected error occurred.')
+    console.error("Frontend image generation error:", err)
+  } finally {
+    setLoading(false)
+  }
+}
+  const handleDownloadImage = () => {
+    if (image) {
+      const link = document.createElement('a')
+      link.href = image
+      link.download = 'generated_image.png'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     }
   }
 
-  // Function to handle image download
-  const handleDownloadImage = () => {
-    if (image) {
-      const link = document.createElement('a');
-      link.href = image; // The base64 image data URL
-      link.download = 'generated_image.png'; // Suggested filename for download
-      document.body.appendChild(link); // Append to body to make it clickable
-      link.click(); // Programmatically click the link to trigger download
-      document.body.removeChild(link); // Clean up the link element
-    }
-  };
-
   return (
-    // Main container with a subtle beige-to-teal gradient background
-    <main className="min-h-screen flex flex-col items-center justify-center p-6
-                     bg-gradient-to-br from-amber-50 to-teal-100 font-inter">
-      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full text-center
-                      transform transition-transform duration-300 hover:scale-[1.01]
-                      border border-gray-200">
-        <h1 className="text-4xl font-extrabold mb-4 flex items-center justify-center gap-3
-                       text-gray-800">
+    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-amber-50 to-teal-100 font-inter">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full text-center transform transition-transform duration-300 hover:scale-[1.01] border border-gray-200">
+        <h1 className="text-4xl font-extrabold mb-4 flex items-center justify-center gap-3 text-gray-800">
           <span className="text-teal-600">✨</span> AI Canvas <span className="text-teal-600">🎨</span>
         </h1>
         <p className="text-gray-600 mb-8 text-lg">
@@ -75,18 +73,13 @@ export default function Home() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="e.g. A serene landscape with cherry blossoms and a distant mountain, oil painting style"
-            className="flex-1 border border-gray-300 rounded-xl px-5 py-3 text-gray-700
-                       focus:outline-none focus:ring-3 focus:ring-teal-400 focus:border-transparent
-                       shadow-sm transition-all duration-200 placeholder-gray-400"
-            disabled={loading} // Disable input when loading
+            className="flex-1 border border-gray-300 rounded-xl px-5 py-3 text-gray-700 focus:outline-none focus:ring-3 focus:ring-teal-400 focus:border-transparent shadow-sm transition-all duration-200 placeholder-gray-400"
+            disabled={loading}
           />
           <button
             onClick={handleGenerate}
-            className="bg-teal-600 text-white font-semibold px-6 py-3 rounded-xl
-                       hover:bg-teal-700 transition-all duration-300 ease-in-out
-                       shadow-md hover:shadow-lg focus:outline-none focus:ring-3 focus:ring-teal-400
-                       disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={loading} // Disable button when loading
+            className="bg-teal-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-teal-700 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-3 focus:ring-teal-400 disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={loading}
           >
             {loading ? 'Generating...' : 'Generate Image'}
           </button>
@@ -110,35 +103,26 @@ export default function Home() {
 
         {image && (
           <div className="mt-8 flex flex-col items-center">
-            {/* Using Next.js Image component for optimization */}
             <Image
               src={image}
               alt="Generated"
-              width={500} // Provide a default width
-              height={500} // Provide a default height
-              className="max-w-full h-auto rounded-xl shadow-xl border border-gray-200
-                         object-contain max-h-[400px] mb-6"
-              priority // Prioritize loading of this image
+              width={500}
+              height={500}
+              className="max-w-full h-auto rounded-xl shadow-xl border border-gray-200 object-contain max-h-[400px] mb-6"
+              priority
             />
             <button
               onClick={handleDownloadImage}
-              className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl
-                         hover:bg-blue-700 transition-all duration-300 ease-in-out
-                         shadow-md hover:shadow-lg focus:outline-none focus:ring-3 focus:ring-blue-400"
+              className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-3 focus:ring-blue-400"
             >
               Download Image
             </button>
           </div>
         )}
 
-        {/* Add a link to the support page with a distinct style */}
         <div className="mt-10">
           <Link href="/support" passHref>
-            <button className="bg-teal-50 text-teal-700 font-semibold px-6 py-3 rounded-xl
-                               border border-teal-300 shadow-md
-                               hover:bg-teal-100 hover:border-teal-400 transition-all duration-300 ease-in-out
-                               focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2
-                               flex items-center justify-center gap-2 text-lg">
+            <button className="bg-teal-50 text-teal-700 font-semibold px-6 py-3 rounded-xl border border-teal-300 shadow-md hover:bg-teal-100 hover:border-teal-400 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 flex items-center justify-center gap-2 text-lg">
               Support the Developer 💖
             </button>
           </Link>
