@@ -1,10 +1,11 @@
 // app/support/page.js
 'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'; // For Next.js App Router
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function SupportPage() {
+// Separate component that uses useSearchParams
+function SupportContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,6 @@ export default function SupportPage() {
       // Clear the query params after displaying message
       router.replace('/support', undefined, { shallow: true });
     } else if (searchParams.get('canceled')) {
-      // Fix: Use escaped apostrophe or avoid contractions
       setMessage('Payment canceled. No worries, you can always support later!');
       router.replace('/support', undefined, { shallow: true });
     }
@@ -65,14 +65,14 @@ export default function SupportPage() {
     { label: '$5', value: 500 },
     { label: '$10', value: 1000 },
     { label: '$25', value: 2500 },
-    { label: 'Custom', value: 'custom' }, // For custom amount input
+    { label: 'Custom', value: 'custom' },
   ];
 
   const [customAmount, setCustomAmount] = useState('');
 
   const handleCustomSupport = () => {
     const amountInCents = parseFloat(customAmount) * 100;
-    if (isNaN(amountInCents) || amountInCents < 50) { // Minimum $0.50
+    if (isNaN(amountInCents) || amountInCents < 50) {
       setMessage('Please enter a valid amount (minimum $0.50).');
       return;
     }
@@ -148,5 +148,35 @@ export default function SupportPage() {
         </button>
       </div>
     </main>
+  );
+}
+
+// Loading component for Suspense fallback
+function SupportLoading() {
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center p-6
+                     bg-gradient-to-br from-amber-50 to-teal-100 font-inter">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full text-center
+                      border border-gray-200">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded mb-6"></div>
+          <div className="flex justify-center gap-4 mb-6">
+            <div className="h-12 w-20 bg-gray-200 rounded-xl"></div>
+            <div className="h-12 w-20 bg-gray-200 rounded-xl"></div>
+            <div className="h-12 w-20 bg-gray-200 rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// Main component that wraps SupportContent in Suspense
+export default function SupportPage() {
+  return (
+    <Suspense fallback={<SupportLoading />}>
+      <SupportContent />
+    </Suspense>
   );
 }
